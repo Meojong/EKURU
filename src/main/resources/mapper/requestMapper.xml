@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scit.ekuru.dao.RequestMapper">
+<!-- 메인에 전체 게시글 불러오기 -->
+<select id="selectRequestAll" parameterType="string" resultType="request">
+select
+	reqNum
+	,userId
+	,categoryCode
+	,reqTitle
+	,reqContent
+	,reqIndate
+	,ReqOriginalPic1
+	,ReqOriginalPic2
+	,ReqOriginalPic3
+from
+	e_request_tb
+<if test="_parameter != null">
+where
+	reqContent like '%'|| #{search} || '%'
+or
+	reqTitle like '%'|| #{search} || '%'
+</if>
+order by reqNum desc
+</select>
+<!-- 해당 ID의 요청글 불러오기 -->
+<select id="mypageReq" parameterType="string" resultType="request">
+select
+	reqNum
+	,userId
+	,categoryCode
+	,reqTitle
+	,reqContent
+	,reqIndate
+from
+	e_request_tb
+where
+	userId = #{userId}
+order by reqNum desc
+</select>
+<!-- 해당 ID의 요청글 전체 삭제 -->
+<delete id="deleteMypageReq" parameterType="string">
+delete
+from
+	e_request_tb
+where
+	userId=#{userId}
+</delete>
+<!-- 요청글 쓰기 insert -->
+<insert id="insertOne" parameterType="request">
+insert into 
+	e_request_tb(
+	    reqNum
+	    ,userId
+	    ,categoryCode
+	    ,reqTitle
+	    ,reqContent
+	    ,reqOriginalPic1
+		,reqOriginalPic2
+		,reqOriginalPic3
+	)values(
+	    reqnum_seq.nextval
+	    ,#{userId}
+	    ,#{categoryCode}
+	    ,#{reqTitle}
+	    ,#{reqContent}
+	    ,#{reqOriginalPic1}
+	    ,#{reqOriginalPic2}
+	    ,#{reqOriginalPic3}
+	)
+</insert>
+<!-- 게시글 작성한 것 불러오기 select -->
+<select id="selectReqOne" parameterType="int" resultType="request">
+select
+	reqNum
+    ,userId
+    ,categoryCode
+    ,reqTitle
+    ,reqContent
+    ,reqIndate
+    ,reqOriginalPic1
+	,reqOriginalPic2
+	,reqOriginalPic3
+from
+	e_request_tb
+where
+	reqNum = #{reqNum}
+</select>
+<!-- 작성한 게시글 삭제하기 -->
+<delete id="deleteRequest" parameterType="request">
+delete
+from
+	e_request_tb
+where
+	reqNum = #{reqNum}
+	and
+	userId = #{userId}
+</delete>
+<!-- 요청글 수정 -->
+<update id="updateRequest" parameterType="request">
+update
+	e_request_tb
+set
+	categoryCode = #{categoryCode}
+	,reqTitle = #{reqTitle}
+	,reqContent = #{reqContent}
+	,reqOriginalPic1 = #{reqOriginalPic1}
+	,reqOriginalPic2 = #{reqOriginalPic2}
+	,reqOriginalPic3 = #{reqOriginalPic3}
+where
+	reqNum = #{reqNum}
+	and userId = #{userId}
+</update>
+<!-- 카테고리별 목록 출력 -->
+<select id="requestCategoryResult" parameterType="int" resultType="request">
+select
+	reqNum
+	,userId
+	,categoryCode
+	,reqTitle
+	,reqContent
+	,reqIndate
+	,reqOriginalPic1
+	,reqOriginalPic2
+	,reqOriginalPic3
+from
+	e_request_tb
+where
+	categoryCode = #{categoryCode}
+</select>
+
+<!-- 코멘트 달기 -->
+<insert id="insertComment" parameterType="comment">
+insert into
+	e_requestComment_tb(
+		reqCommentNum
+		,userId
+		,reqNum
+		,reqComment
+	)values(
+		reqCommentNum_seq.nextval
+		,#{userId}
+		,#{reqNum}
+		,#{reqComment}
+	)
+</insert>
+<!-- 코멘트 불러오기 -->
+<select id="selectComment" resultType="comment">
+select
+	reqCommentNum
+	,userId
+	,reqNum
+	,reqComment
+from
+	e_requestComment_tb
+where
+	reqNum = #{reqNum}
+</select>
+<!-- 코멘트 삭제전 해당 글의 넘버 가져오기 -->
+<select id="getReqNum" parameterType="int" resultType="comment">
+select
+	r.reqNum
+from
+	e_request_tb r, e_requestComment_tb c
+where
+	r.reqNum = c.reqNum
+and
+	c.reqCommentNum = #{reqCommentNum}
+</select>
+<!-- 코멘트 삭제 -->
+<delete id="deleteComment" parameterType="comment">
+delete
+from
+	e_requestComment_tb
+where
+	reqCommentNum = #{reqCommentNum}
+	and
+	userId = #{userId}
+</delete>
+<!-- AD 관련 요청글 출력 -->
+<select id="selectReqAd" resultType="hashmap">
+select
+    r.reqNum as reqNum
+    ,r.userId as userId
+    ,r.categoryCode as categoryCode
+    ,r.reqTitle as reqTitle
+    ,r.reqContent as reqContent
+    ,r.reqIndate as reqIndate
+    ,r.reqOriginalPic1 as reqOriginalPic1
+    ,r.reqOriginalPic2 as reqOriginalPic2
+    ,r.reqOriginalPic3 as reqOriginalPic3
+from
+    e_request_tb r, e_ad_tb a
+where
+    r.reqNum = a.reqNum
+</select>
+</mapper>
